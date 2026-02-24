@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Exercise Book Reissue</title>
+    <label>DS</label>
+    <link rel="stylesheet" href="reissue.css">
+</head>
+<body>
+    <button id="menuToggle" class="menu-toggle">☰</button>
+    <div id="sliderNav" class="slider-nav">
+        <a href="reissue.html">Reissue</a>
+        <a href="admin.html">Admin</a>
+        <a href="resource.html">Resources</a>
+        <a href="library.html">Library</a>
+    </div>
+    <nav class="site-nav">
+        <a href="reissue.html" class="active">Reissue</a>
+        <a href="admin.html">Admin</a>
+        <a href="resource.html">Resources</a>
+        <a href="library.html">Library</a>
+    </nav>
+
+    <!-- Setup Screen (First time) -->
+    <div id="setupScreen" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1001; display: flex; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); max-width: 400px; width: 90%;">
+            <h2 style="text-align: center; margin-top: 0; color: #333;">First Time Setup</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">Create your own password for this system</p>
+            <input id="setupPassword" type="password" placeholder="Create a password" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box; margin-bottom: 10px;">
+            <input id="setupPasswordConfirm" type="password" placeholder="Confirm password" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box; margin-bottom: 15px;">
+            <p style="color: #999; font-size: 12px; margin: 0 0 15px 0;">Password must be at least 4 characters long</p>
+            <button id="setupBtn" style="width: 100%; padding: 12px; background: #4caf50; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold;">Create Password & Continue</button>
+            <p id="setupError" style="color: #d9534f; text-align: center; margin-top: 10px; display: none;"></p>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); max-width: 400px; width: 90%;">
+            <h2 style="text-align: center; margin-top: 0; color: #333;">Reissue Staff Login</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;">Enter your password to access student data</p>
+            <input id="passwordInput" type="password" placeholder="Enter password" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box; margin-bottom: 15px;">
+            <button id="loginBtn" style="width: 100%; padding: 12px; background: #2196f3; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold;">Login</button>
+            <p id="loginError" style="color: #d9534f; text-align: center; margin-top: 10px; display: none;"></p>
+            <p style="text-align: center; color: #999; font-size: 12px; margin-top: 15px;">
+                <button id="resetPasswordBtn" style="background: none; border: none; color: #2196f3; cursor: pointer; text-decoration: underline;">Forgot password?</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Content (Hidden until login) -->
+    <div id="mainContent" style="display: none;">
+        <header>
+            <h1>Exercise Book Reissue</h1>
+            <p class="subtitle">Mark filled books and verify school ID to reissue</p>
+            <button id="logoutBtn" style="position: absolute; top: 20px; right: 20px; padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">Logout</button>
+        </header>
+
+        <section class="panel" id="addStudentPanel">
+            <h2>Add Student</h2>
+            <div class="row">
+                <input id="stuId" placeholder="School ID (numeric)" inputmode="numeric">
+                <input id="stuName" placeholder="Student name">
+                <input id="stuSubjects" placeholder="Subjects (comma-separated, e.g. Math,English)">
+                <input id="stuExpiry" type="date" title="Expiry date (applies to entered subjects)">
+                <button id="addStudent">Add</button>
+            </div>
+            <p style="margin-top:8px;color:#666;font-size:13px;">You can set an expiry date; expired subjects are auto-marked for reissue.</p>
+        </section>
+
+        <section class="panel">
+            <h2>Students</h2>
+            <ul id="studentsList" class="list"></ul>
+        </section>
+
+        <section class="panel">
+            <h2>Pending Reissues</h2>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+                <label style="font-size:14px;color:#555;margin:0;">Subject:</label>
+                <select id="subjectFilter" style="padding:6px;border-radius:4px;border:1px solid #ddd;">
+                    <option value="__all__">All</option>
+                </select>
+                <button id="reissueSubjectBtn" style="padding:6px 10px;background:#4caf50;color:#fff;border:none;border-radius:4px;cursor:pointer;">Reissue subject</button>
+                <button id="reissueSelectedBtn" style="padding:6px 10px;background:#1976d2;color:#fff;border:none;border-radius:4px;cursor:pointer;">Reissue selected</button>
+                <label style="font-size:13px;color:#666;margin-left:12px;"><input id="autoMarkExpired" type="checkbox" checked> Auto-mark expired</label>
+            </div>
+            <p class="hint">Staff verifies the student's school ID and clicks reissue.</p>
+            <ul id="pendingList" class="list"></ul>
+        </section>
+    </div>
+
+    <script src="menu.js"></script>
+    <script src="reissue.js"></script>
+</body>
+</html>

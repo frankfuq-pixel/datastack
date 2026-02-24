@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>resources</title>
+    <link rel="stylesheet" href="reissue.css">
+</head>
+<body>
+    <button id="menuToggle" class="menu-toggle">☰</button>
+    <div id="sliderNav" class="slider-nav">
+        <a href="reissue.html">Reissue</a>
+        <a href="admin.html">Admin</a>
+        <a href="resource.html">Resources</a>
+        <a href="library.html">Library</a>
+    </div>
+    <nav class="site-nav">
+        <a href="reissue.html">Reissue</a>
+        <a href="admin.html">Admin</a>
+        <a href="resource.html" class="active">Resources</a>
+        <a href="library.html">Library</a>
+    </nav>
+
+    <main>
+        <h1>Resources & Book Inventory</h1>
+        <p class="meta">Track exercise book inventory and remaining stock.</p>
+
+        <section class="panel">
+            <h2>Book Inventory Management</h2>
+            <div class="row">
+                <input id="initialStock" type="number" placeholder="Initial book stock" min="0" value="100">
+                <button id="setStockBtn">Set Initial Stock</button>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Inventory Overview</h2>
+            <div class="stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <div style="padding: 15px; background: #e8f5e9; border-radius: 4px; border-left: 4px solid #4caf50;">
+                    <div class="meta">Initial Stock</div>
+                    <div style="font-size: 24px; font-weight: bold;" id="initialStockDisplay">0</div>
+                </div>
+                <div style="padding: 15px; background: #fff3e0; border-radius: 4px; border-left: 4px solid #ff9800;">
+                    <div class="meta">Books Issued</div>
+                    <div style="font-size: 24px; font-weight: bold;" id="issuedCount">0</div>
+                </div>
+                <div style="padding: 15px; background: #e3f2fd; border-radius: 4px; border-left: 4px solid #2196f3;">
+                    <div class="meta">Remaining Stock</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #2196f3;" id="remainingStock">0</div>
+                </div>
+                <div style="padding: 15px; background: #fce4ec; border-radius: 4px; border-left: 4px solid #e91e63;">
+                    <div class="meta">Stock Percentage</div>
+                    <div style="font-size: 24px; font-weight: bold;" id="stockPercent">0%</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 4px;">
+                <h3>Stock Alert</h3>
+                <div id="stockAlert" style="padding: 10px; border-radius: 4px; font-weight: 500;"></div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Reissue History by Student</h2>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                    <thead>
+                        <tr style="background: #f0f0f0; border-bottom: 2px solid #ddd;">
+                            <th style="padding: 10px; text-align: left;">Student Name</th>
+                            <th style="padding: 10px; text-align: left;">School ID</th>
+                            <th style="padding: 10px; text-align: center;">Books Issued</th>
+                            <th style="padding: 10px; text-align: left;">Last Issued</th>
+                            <th style="padding: 10px; text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reissueHistoryTable">
+                        <tr>
+                            <td colspan="5" style="padding: 20px; text-align: center; color: #999;">No student data yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Actions</h2>
+            <button id="exportBtn" style="padding: 10px 20px; margin-right: 10px; background: #4caf50; color: white; border: none; border-radius: 4px; cursor: pointer;">Export Report (CSV)</button>
+            <button id="resetBtn" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">Reset All Data</button>
+        </section>
+    </main>
+
+    <script>
+        const STORAGE_KEY = 'reissue_students_v1';
+        const INVENTORY_KEY = 'book_inventory_v1';
+
+        function getInventory() {
+            try { return JSON.parse(localStorage.getItem(INVENTORY_KEY)) || { initialStock: 0 }; }
+            catch (e) { return { initialStock: 0 }; }
+        }
+
+        function saveInventory(inv) {
+            localStorage.setItem(INVENTORY_KEY, JSON.stringify(inv));
+        }
+
+        function getStudents() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+            catch (e) { return []; }
+        }
+
+        function updateInventoryDisplay() {
+            const inventory = getInventory();
+            const students = getStudents();
+            
+            const initialStock = inventory.initialStock || 0;
+            const totalIssued = students.reduce((sum, s) => sum + (s.issuedCount || 0), 0);
+            const remaining = initialStock - totalIssued;
+            const percent = initialStock > 0 ? Math.round((remaining / initialStock) * 100) : 0;
+
+            document.getElementById('initialStockDisplay').textContent = initialStock;
+            document.getElementById('issuedCount').textContent = totalIssued;
+            document.getElementById('remainingStock').textContent = remaining;
+            document.getElementById('stockPercent').textContent = percent + '%';
+
+            // Stock alert
+            const alertDiv = document.getElementById('stockAlert');
+            if (remaining <= 0) {
+                alertDiv.style.background = '#ffebee';
+                alertDiv.style.color = '#c62828';
+                alertDiv.textContent = '🚨 OUT OF STOCK - No books remaining!';
+            } else if (percent < 20) {
+                alertDiv.style.background = '#fff3e0';
+                alertDiv.style.color = '#e65100';
+                alertDiv.textContent = '⚠️ LOW STOCK WARNING - Less than 20% remaining';
+            } else if (percent < 50) {
+                alertDiv.style.background = '#e3f2fd';
+                alertDiv.style.color = '#1565c0';
+                alertDiv.textContent = '💡 Moderate stock level - Consider reordering soon';
+            } else {
+                alertDiv.style.background = '#e8f5e9';
+                alertDiv.style.color = '#2e7d32';
+                alertDiv.textContent = '✓ Healthy stock level';
+            }
+
+            updateReissueTable();
+        }
+
+        function updateReissueTable() {
+            const students = getStudents();
+            const tbody = document.getElementById('reissueHistoryTable');
+            tbody.innerHTML = '';
+
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #999;">No student data yet</td></tr>';
+                return;
+            }
+
+            students.forEach(s => {
+                const row = tbody.insertRow();
+                row.style.borderBottom = '1px solid #eee';
+                row.innerHTML = `
+                    <td style="padding: 10px;">${s.name || 'Unknown'}</td>
+                    <td style="padding: 10px;">${s.id}</td>
+                    <td style="padding: 10px; text-align: center;"><strong>${s.issuedCount || 0}</strong></td>
+                    <td style="padding: 10px;">${s.lastIssued || 'Never'}</td>
+                    <td style="padding: 10px; text-align: center;">
+                        <span style="padding: 4px 8px; border-radius: 3px; background: ${s.needsReissue ? '#ffebee' : '#e8f5e9'}; color: ${s.needsReissue ? '#c62828' : '#2e7d32'}; font-size: 12px;">
+                            ${s.needsReissue ? 'Pending' : 'Current'}
+                        </span>
+                    </td>
+                `;
+            });
+        }
+
+        function exportCSV() {
+            const inventory = getInventory();
+            const students = getStudents();
+            const totalIssued = students.reduce((sum, s) => sum + (s.issuedCount || 0), 0);
+            const remaining = (inventory.initialStock || 0) - totalIssued;
+
+            let csv = 'Exercise Book Inventory Report\n';
+            csv += new Date().toLocaleString() + '\n\n';
+            csv += 'INVENTORY SUMMARY\n';
+            csv += 'Initial Stock,' + (inventory.initialStock || 0) + '\n';
+            csv += 'Total Issued,' + totalIssued + '\n';
+            csv += 'Remaining,' + remaining + '\n\n';
+            csv += 'STUDENT REISSUE HISTORY\n';
+            csv += 'Student Name,School ID,Books Issued,Last Issued,Status\n';
+            students.forEach(s => {
+                csv += `"${s.name || 'Unknown'}",${s.id},${s.issuedCount || 0},"${s.lastIssued || 'Never'}","${s.needsReissue ? 'Pending' : 'Current'}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'inventory_report_' + new Date().getTime() + '.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const inventory = getInventory();
+            document.getElementById('initialStock').value = inventory.initialStock || 0;
+            updateInventoryDisplay();
+
+            document.getElementById('setStockBtn').addEventListener('click', () => {
+                const stock = parseInt(document.getElementById('initialStock').value) || 0;
+                if (stock < 0) { alert('Stock must be 0 or higher'); return; }
+                const inv = getInventory();
+                inv.initialStock = stock;
+                saveInventory(inv);
+                updateInventoryDisplay();
+                alert('Initial stock set to ' + stock + ' books');
+            });
+
+            document.getElementById('exportBtn').addEventListener('click', exportCSV);
+
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                if (confirm('Are you sure? This will permanently delete all inventory data.')) {
+                    localStorage.removeItem(INVENTORY_KEY);
+                    document.getElementById('initialStock').value = 0;
+                    updateInventoryDisplay();
+                    alert('All inventory data has been reset');
+                }
+            });
+
+            // Refresh when storage changes (syncs across tabs)
+            window.addEventListener('storage', updateInventoryDisplay);
+        });
+    </script>
+    <script src="menu.js"></script>
+</body>
+</html>

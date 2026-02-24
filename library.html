@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Library Management</title>
+    <link rel="stylesheet" href="reissue.css">
+    <style>
+        main{padding:16px}
+        .form-row{display:flex;gap:8px;flex-wrap:wrap}
+        .form-row input, .form-row select{flex:1;min-width:120px}
+    </style>
+</head>
+<body>
+    <button id="menuToggle" class="menu-toggle">☰</button>
+    <div id="sliderNav" class="slider-nav">
+        <a href="reissue.html">Reissue</a>
+        <a href="admin.html">Admin</a>
+        <a href="resource.html">Resources</a>
+        <a href="library.html" class="active">Library</a>
+    </div>
+    <nav class="site-nav">
+        <a href="reissue.html">Reissue</a>
+        <a href="admin.html">Admin</a>
+        <a href="resource.html">Resources</a>
+        <a href="library.html" class="active">Library</a>
+    </nav>
+
+    <main>
+        <h1>Library Management</h1>
+        <section class="panel" id="bookPanel">
+            <h2>Add / Edit Book</h2>
+            <div class="form-row">
+                <input id="bookIsbn" placeholder="ISBN">
+                <input id="bookTitle" placeholder="Title">
+                <input id="bookAuthor" placeholder="Author">
+                <input id="bookGenre" placeholder="Genre">
+                <input id="bookPubDate" type="date" placeholder="Publication">
+                <input id="bookTotal" type="number" min="1" placeholder="Total copies">
+                <button id="saveBook">Save</button>
+            </div>
+            <p class="hint">Enter ISBN and press save to add or update a book.</p>
+        </section>
+
+        <section class="panel" id="searchPanel">
+            <h2>Search & Inventory</h2>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <input id="searchQuery" placeholder="search by title/author/isbn/genre">
+                <button id="searchBtn">Search</button>
+                <button id="refreshBtn">Show All</button>
+            </div>
+            <div id="inventoryStats" class="stats" style="margin:12px 0"></div>
+            <div id="overdueAlert" style="color:#d9534f; font-weight:600; margin-bottom:8px;"></div>
+            <ul id="bookList" class="list" style="max-height:500px; overflow-y:auto;"></ul>
+        </section>
+
+        <section class="panel" id="borrowPanel">
+            <h2>Borrow / Return</h2>
+            <div class="form-row">
+                <input id="borrowIsbn" placeholder="ISBN">
+                <input id="borrowUser" placeholder="Borrower name/ID">
+                <input id="borrowDue" type="date" placeholder="Due date">
+                <button id="borrowBtn">Borrow</button>
+            </div>
+            <div class="form-row" style="margin-top:8px;">
+                <input id="returnIsbn" placeholder="ISBN">
+                <input id="returnUser" placeholder="Borrower name/ID">
+                <button id="returnBtn">Return</button>
+            </div>
+            <p id="borrowMessage" style="margin-top:6px;color:#d9534f;"></p>
+        </section>
+
+        <section class="panel" id="reportPanel">
+            <h2>Reports</h2>
+            <button id="loadReport">Refresh Summary</button>
+            <div id="reportArea" style="margin-top:10px"></div>
+        </section>
+    </main>
+
+    <script src="menu.js"></script>
+    <script src="library.js"></script>
+</body>
+</html>

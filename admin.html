@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Admin</title>
+    <label>DS</label>
+    <link rel="stylesheet" href="reissue.css">
+    <style>main{padding:16px}</style>
+</head>
+<body>
+    <button id="menuToggle" class="menu-toggle">☰</button>
+    <div id="sliderNav" class="slider-nav">
+        <a href="reissue.html">Reissue</a>
+        <a href="admin.html">Admin</a>
+        <a href="resource.html">Resources</a>
+        <a href="library.html">Library</a>
+    </div>
+    <nav class="site-nav">
+        <a href="reissue.html">Reissue</a>
+        <a href="admin.html" class="active">Admin</a>
+        <a href="resource.html">Resources</a>
+        <a href="library.html">Library</a>
+    </nav>
+
+    <main>
+        <h1>Admin</h1>
+        <p class="meta">Admin tools and student database management.</p>
+
+        <section class="panel">
+            <h2>Students Database</h2>
+            <p class="hint">View and manage all registered students.</p>
+            <div id="statsContainer" class="stats" style="display: flex; gap: 20px; margin-bottom: 20px;">
+                <div style="padding: 10px; background: #f0f0f0; border-radius: 4px;">
+                    <strong>Total Students:</strong> <span id="totalCount">0</span>
+                </div>
+                <div style="padding: 10px; background: #f0f0f0; border-radius: 4px;">
+                    <strong>Pending Reissues:</strong> <span id="pendingCount">0</span>
+                </div>
+            </div>
+            <ul id="adminStudentsList" class="list" style="max-height: 600px; overflow-y: auto;"></ul>
+        </section>
+
+        <section class="panel">
+            <h2>Reissue Page Security</h2>
+            <p class="hint">Manage the password for accessing student data in the Reissue page.</p>
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                <p style="margin: 0 0 10px 0; color: #666;">Current password: <strong id="currentPassDisplay">staff</strong> (default)</p>
+                <p style="margin: 0; color: #999; font-size: 12px;">Users must enter this password to view and manage student data.</p>
+            </div>
+            <div class="row" style="gap: 10px;">
+                <input id="newPassword" type="password" placeholder="Enter new password" style="flex: 1;">
+                <button id="changePassBtn" style="padding: 10px 20px; background: #4caf50; color: white; border: none; border-radius: 4px; cursor: pointer;">Update Password</button>
+            </div>
+            <p id="passMessage" style="margin-top: 10px; font-size: 14px;"></p>
+        </section>
+    </main>
+
+    <script>
+        const STORAGE_KEY = 'reissue_students_v1';
+        const PASSWORD_KEY = 'reissue_password';
+        const DEFAULT_PASSWORD = 'staff';
+
+        function loadStudents() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+            catch (e) { return []; }
+        }
+
+        function renderAdminStudents() {
+            const list = loadStudents();
+            const ul = document.getElementById('adminStudentsList');
+            const totalSpan = document.getElementById('totalCount');
+            const pendingSpan = document.getElementById('pendingCount');
+
+            ul.innerHTML = '';
+            totalSpan.textContent = list.length;
+            pendingSpan.textContent = list.filter(s => s.needsReissue).length;
+
+            if (list.length === 0) {
+                ul.innerHTML = '<li style="padding: 20px; text-align: center; color: #999;">No students registered yet.</li>';
+                return;
+            }
+
+            list.forEach(s => {
+                const li = document.createElement('li');
+                li.innerHTML = `<div>
+                    <div><strong>${s.name || 'Unknown'}</strong> <span class="meta">(ID: ${s.id})</span></div>
+                    <div class="meta">Issued: ${s.issuedCount || 0} times — Last: ${s.lastIssued || 'Never'}</div>
+                    <div class="meta" style="color: ${s.needsReissue ? '#d9534f' : '#5cb85c'};">
+                        Status: ${s.needsReissue ? '⚠ Pending Reissue' : '✓ Current'}
+                    </div>
+                </div>`;
+                const actions = document.createElement('div');
+                actions.className = 'actions';
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.style.backgroundColor = '#d9534f';
+                deleteBtn.style.color = 'white';
+                deleteBtn.onclick = () => {
+                    if (confirm(`Delete student "${s.name}"?`)) {
+                        const list = loadStudents();
+                        const idx = list.findIndex(st => st.id === s.id);
+                        if (idx > -1) {
+                            list.splice(idx, 1);
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+                            renderAdminStudents();
+                        }
+                    }
+                };
+                actions.appendChild(deleteBtn);
+                li.appendChild(actions);
+                ul.appendChild(li);
+            });
+        }
+
+        function updatePasswordDisplay() {
+            const savedPassword = localStorage.getItem(PASSWORD_KEY) || DEFAULT_PASSWORD;
+            document.getElementById('currentPassDisplay').textContent = savedPassword;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAdminStudents();
+            updatePasswordDisplay();
+
+            document.getElementById('changePassBtn').addEventListener('click', () => {
+                const newPass = document.getElementById('newPassword').value.trim();
+                const passMessage = document.getElementById('passMessage');
+
+                if (!newPass) {
+                    passMessage.textContent = '❌ Password cannot be empty';
+                    passMessage.style.color = '#d9534f';
+                    return;
+                }
+
+                if (newPass.length < 4) {
+                    passMessage.textContent = '❌ Password must be at least 4 characters';
+                    passMessage.style.color = '#d9534f';
+                    return;
+                }
+
+                localStorage.setItem(PASSWORD_KEY, newPass);
+                document.getElementById('newPassword').value = '';
+                updatePasswordDisplay();
+                passMessage.textContent = '✓ Password updated successfully. New password required for next login.';
+                passMessage.style.color = '#5cb85c';
+                setTimeout(() => { passMessage.textContent = ''; }, 3000);
+            });
+
+            document.getElementById('newPassword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') document.getElementById('changePassBtn').click();
+            });
+        });
+    </script>
+    <script src="menu.js"></script>
+</body>
+</html>

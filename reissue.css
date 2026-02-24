@@ -1,0 +1,83 @@
+:root{
+  --bg: #f5f7fb;
+  --accent: #3b82f6;
+  --muted: #6b7280;
+  --surface: #ffffff;
+  --radius: 12px;
+  --shadow-sm: 0 6px 18px rgba(2,6,23,0.06);
+  --shadow-md: 0 10px 30px rgba(2,6,23,0.08);
+  --focus: rgba(59,130,246,0.18);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  margin:24px;
+  background:var(--bg);
+  color:rgb(61, 12, 240);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  font-size:14px;
+  line-height:1.4;
+}
+header h1{margin:0 0 6px 0;font-size:20px;color:var(--accent);font-weight:700;letter-spacing:-0.02em}
+.subtitle{margin:6px 0 14px;color:var(--muted);font-size:13px}
+.panel{background:var(--surface);padding:16px;border-radius:var(--radius);margin-bottom:16px;border:1px solid rgba(2,6,23,0.04);box-shadow:var(--shadow-sm)}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+input,select,textarea{background:#fff;padding:10px 12px;border-radius:10px;border:1px solid rgba(15,23,42,0.06);box-shadow:none;transition:box-shadow .12s,border-color .12s,transform .08s;font-size:14px}
+input:focus,select:focus,textarea:focus{outline:none;box-shadow:0 8px 24px rgba(37,99,235,0.08);border-color:rgba(37,99,235,0.25);transform:translateY(-1px)}
+select[multiple]{min-width:180px;max-width:260px;padding:8px}
+button{background:transparent;color:var(--accent);border:1px solid rgba(37,99,235,0.12);padding:8px 12px;border-radius:9999px;cursor:pointer;transition:background-color .12s,color .12s,transform .08s,box-shadow .12s;font-weight:600;font-size:13px;line-height:1;min-height:36px}
+button.primary{background:var(--accent);color:#fff;border-color:transparent;box-shadow:var(--shadow-md)}
+button:hover{background:rgba(37,99,235,0.06);transform:translateY(-2px)}
+button:active{transform:translateY(0)}
+.list{list-style:none;padding:0;margin:0}
+.list li{display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:12px;border:1px solid rgba(2,6,23,0.03);margin-bottom:10px;background:linear-gradient(180deg,#ffffff 0%, #fafbff 100%);transition:box-shadow .12s,transform .08s}
+.list li:hover{box-shadow:0 12px 30px rgba(2,6,23,0.06);transform:translateY(-3px)}
+.meta{font-size:13px;color:var(--muted);margin-top:4px}
+.actions{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.verifyInput{width:140px;padding:8px;border-radius:8px;border:1px solid rgba(15,23,42,0.06)}
+.hint{font-size:13px;color:var(--muted);margin:6px 0}
+label{ color:#0f172a;font-weight:600;font-size:13px;margin:0;font-family:inherit}
+a{font-style:italic;font-size:40px;font-weight:600; color:var(--accent);text-decoration:none;font-size:13px}
+a:hover{text-decoration:underline}
+.badge{display:inline-block;padding:4px 8px;border-radius:9999px;font-size:12px;background:rgba(37,99,235,0.08);color:var(--accent);border:1px solid rgba(37,99,235,0.12)}
+/* Removed an overly-large label rule that caused layout issues */
+
+/* slider / off-canvas menu */
+/* toggle button always on left edge */
+.menu-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;           /* move to right side */
+  left: auto;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 4px;
+  z-index: 1100;
+  cursor: pointer;
+  font-size: 18px;
+}
+/* slide‑in panel comes from the left */
+.slider-nav {
+  position: fixed;
+  top: 0;
+  right: -260px;        /* hidden off-screen to right */
+  left: auto;
+  width: 260px;
+  height: 100%;
+  background: var(--surface);
+  box-shadow: -2px 0 12px rgba(0,0,0,0.15);
+  transition: right .3s ease;
+  padding: 20px 10px;
+  z-index: 1090;
+}
+.slider-nav.open { right: 0; }
+.slider-nav a { display: block; margin: 12px 0; font-size: 15px; }
+
+/* responsive: hide top nav when using small viewport */
+@media(max-width:600px){
+  .site-nav{display:none;}
+}
